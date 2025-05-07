@@ -1,0 +1,71 @@
+const jugadoresPost = async (req = request, res = response) => {
+  try {
+    const data = { ...req.body };
+
+    // Buscar el país por nombre si no es un ObjectId
+    if (data.pais_nacimiento && !mongoose.Types.ObjectId.isValid(data.pais_nacimiento)) {
+      const paisEncontrado = await MongoPais.findOne({ nombre: data.pais_nacimiento.trim() });
+      if (!paisEncontrado) {
+        return res.status(400).json({ ok: false, msg: `El país "${data.pais_nacimiento}" no existe` });
+      }
+      data.pais_nacimiento = paisEncontrado._id;
+    }
+
+    // Buscar el equipo por nombre si no es un ObjectId
+    if (data.equipo_actual && !mongoose.Types.ObjectId.isValid(data.equipo_actual)) {
+      const equipoEncontrado = await MongoEquipo.findOne({ nombre: data.equipo_actual.trim() });
+      if (!equipoEncontrado) {
+        return res.status(400).json({ ok: false, msg: `El equipo "${data.equipo_actual}" no existe` });
+      }
+      data.equipo_actual = equipoEncontrado._id;
+    }
+
+    // Crear jugador
+    const jugador = new MongoJugador(data);
+    await jugador.save();
+
+    // Traer el jugador ya con los populate
+    const jugadorConPaisYEquipo = await MongoJugador.findById(jugador.id)
+      .populate('pais_nacimiento', 'nombre')
+      .populate({
+        path: 'equipo_actual',
+        select: 'nombre fundado'
+      })
+      .populate({
+        path: 'contrataciones.equipo',
+        select: 'nombre fundado'
+      })
+      .lean();
+
+    // Formatear fechas
+    const formatearFecha = (fecha) => {
+      return new Date(fecha).toISOString().split('T')[0];
+    };
+
+    if (jugadorConPaisYEquipo.fecha_nacimiento) {
+      jugadorConPaisYEquipo.fecha_nacimiento = formatearFecha(jugadorConPaisYEquipo.fecha_nacimiento);
+    }
+
+    if (jugadorConPaisYEquipo.equipo_actual?.fundado) {
+      jugadorConPaisYEquipo.equipo_actual.fundado = formatearFecha(jugadorConPaisYEquipo.equipo_actual.fundado);
+    }
+
+    if (jugadorConPaisYEquipo.contrataciones && jugadorConPaisYEquipo.contrataciones.length > 0) {
+      jugadorConPaisYEquipo.contrataciones = jugadorConPaisYEquipo.contrataciones.map(contrato => {
+        if (contrato.fecha_contratacion) {
+          contrato.fecha_contratacion = formatearFecha(contrato.fecha_contratacion);
+        }
+        if (contrato.equipo?.fundado) {
+          contrato.equipo.fundado = formatearFecha(contrato.equipo.fundado);
+        }
+        return contrato;
+      });
+    }
+
+    res.status(201).json({ ok: true, msg: 'Jugador creado', jugador: jugadorConPaisYEquipo });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ ok: false, msg: 'Error al crear jugador', error: error.message });
+  }
+};

@@ -8,6 +8,7 @@ const MongoPais = require('./mongoPais.js')
 const MongoEquipo = require('./mongoEquipo.js')
 const MongoJugador = require('./mongoJugador.js')
 const MongoContratacion = require('../models/mongoContrataciones');
+const Neo4jPaises = require('./neo4jPaises.js')
 
 module.exports = {
   Usuario,
@@ -19,5 +20,6 @@ module.exports = {
   MongoPais,
   MongoEquipo,
   MongoJugador,
-  MongoContratacion
+  MongoContratacion,
+  Neo4jPaises
 }

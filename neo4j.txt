@@ -1,0 +1,133 @@
+// CREACIÓN DE NODOS
+
+// Crear nodo de Ciudades
+CREATE (c1:Ciudad {nombre: 'Santiago de Cali', poblacion: '2,228', latitud: '3°26\'24.76\'\'N', longitud: '76°31\'11.76\'\'O'});
+
+// Crear nodos de Sitios
+CREATE (s1:Sitio {nombre: 'El Zaguan De San Antonio', tipo: 'Restaurante', estilo: 'Comida Colombiana'});
+CREATE (s2:Sitio {nombre: 'Iglesia la Ermita', tipo: 'Iglesia', latitud: '3°27\'14\'\'N', longitud: '76°31\'37\'\'O'});
+
+// Crear nodo de Platos
+CREATE (p1:Plato {nombre: 'Sancocho de gallina', tipo: 'Típica'});
+
+// Crear nodo de País
+CREATE (pais1:Pais {nombre: 'Colombia', poblacion: '53,52', continente: 'Sur América'});
+
+// Crear nodo de Persona
+CREATE (persona1:Persona {nombre: 'Juan Sebastián Cabal', tipo: 'Deportista', nacimiento: '25/04/86'});
+
+// CREAR RELACIONES
+
+// Relación entre Ciudad y País
+MATCH (c:Ciudad {nombre: 'Santiago de Cali'}), (p:Pais {nombre: 'Colombia'})
+CREATE (c)-[:perteneceA]->(p);
+
+// Relación entre Sitio y Ciudad (El Zaguan)
+MATCH (s:Sitio {nombre: 'El Zaguan De San Antonio'}), (c:Ciudad {nombre: 'Santiago de Cali'})
+CREATE (s)-[:ubicadoEn]->(c);
+
+// Relación entre Sitio y Ciudad (Iglesia)
+MATCH (s:Sitio {nombre: 'Iglesia la Ermita'}), (c:Ciudad {nombre: 'Santiago de Cali'})
+CREATE (s)-[:ubicadoEn]->(c);
+
+// Relación entre Plato y Ciudad (comidaTípica)
+MATCH (p:Plato {nombre: 'Sancocho de gallina'}), (c:Ciudad {nombre: 'Santiago de Cali'})
+CREATE (p)-[:comidaTipica]->(c);
+
+// Relación entre Persona y Ciudad (famoso)
+MATCH (pe:Persona {nombre: 'Juan Sebastián Cabal'}), (c:Ciudad {nombre: 'Santiago de Cali'})
+CREATE (pe)-[:famosoDe]->(c);
+
+// Relación entre Plato y Sitio (prepara)
+MATCH (p:Plato {nombre: 'Sancocho de gallina'}), (s:Sitio {nombre: 'El Zaguan De San Antonio'})
+CREATE (p)-[:preparaEn]->(s);
+
+
+-------
+
+
+// CONSULTAS DE EJEMPLO
+
+// Obtener todos los sitios en Santiago de Cali
+MATCH (s:Sitio)-[:ubicadoEn]->(c:Ciudad {nombre: 'Santiago de Cali'})
+RETURN s.nombre, s.tipo;
+
+// Obtener platos típicos de Santiago de Cali
+MATCH (p:Plato)-[:comidaTipica]->(c:Ciudad {nombre: 'Santiago de Cali'})
+RETURN p.nombre, p.tipo;
+
+// Obtener personas famosas de Santiago de Cali
+MATCH (p:Persona)-[:famosoDe]->(c:Ciudad {nombre: 'Santiago de Cali'})
+RETURN p.nombre, p.tipo, p.nacimiento;
+
+// Obtener sitios donde se prepara Sancocho de gallina
+MATCH (p:Plato {nombre: 'Sancocho de gallina'})-[:preparaEn]->(s:Sitio)
+RETURN s.nombre, s.tipo;
+
+// Obtener información completa de la ciudad de Santiago de Cali
+MATCH (c:Ciudad {nombre: 'Santiago de Cali'})
+RETURN c.nombre, c.poblacion, c.latitud, c.longitud;
+
+// Obtener el país al que pertenece Santiago de Cali
+MATCH (c:Ciudad {nombre: 'Santiago de Cali'})-[:perteneceA]->(p:Pais)
+RETURN c.nombre, p.nombre, p.continente;
+
+
+----
+
+Ejercicio:
+Cuáles son los empleados de sexo mujer y en que tareas están asignadas?
+MATCH (e:Empleado)-[:ASIGNADO_A]->(t:Tarea)
+WHERE e.sexo = 'mujer'
+RETURN e.nombre, t.nombre
+
+Cuáles son los empleados de bogota y en que sede trabajan?
+MATCH (e:Empleado)-[:PERTENECE_A]->(s:Sede)
+WHERE e.ciudad_origen = 'Bogotá'
+RETURN e.nombre, s.nombre
+
+Cuáles son los empleados que tienen un salario superior a 3200?
+MATCH (e:Empleado)-[r:PERTENECE_A]->(s:Sede)
+WHERE r.salario > 3200
+RETURN e.nombre, r.salario
+
+Cuántos empleados hay por sedes?
+MATCH (e:Empleado)-[:PERTENECE_A]->(s:Sede)
+RETURN s.nombre AS Sede, COUNT(e) AS NumeroDeEmpleados
+
+
+-----
+
+
+implementar 2 paises:
+Colombia y estados unidos
+persoanejad famosos:
+deportistas
+politicos
+artistas
+
+
+10 ciudades de colombia / 10 ciudades
+De cada ciudad identificar minimo 10 sitios caracteristicos (restaurantes, hoteles, estadios) de esa 
+identificar 10 comidas tipicas de esos paises e indicar donde se podria ir a consumir esas comidas en alguna parte de esos paises
+Cual es el personaje politico d su base d datos que sea hombre
+responder preguntas
+1 sola base de datos
+
+proyecto final:
+crear base de datos
+basados en esa base de datos en nodos podriamos hacer una extension de la appi rest para conectar la base de datos en nodos
+
+extension de la api rest para poder consultar la informacion o crear mas informacion por medio de la api rest
+
+crear base de datos en neoj
+base de datos relacional - base de datos nosql
+y tenemos nuevos metodos para conectar a la base de datos
+conectarse a cualquier modelo de base de datios
+pensando que necesitamos para implementar el crud
+
+conxion a la base de datos de neoj
+
+conncet- Connect to Free instance- driver - javascript
+
+api rest con neo4j

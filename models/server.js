@@ -3,6 +3,7 @@ const cors = require('cors')
 
 // const { bdmysql } = require('../database/MySqlConnection')
 const { dbConnectionMongo } = require('../database/MongoConnection')
+const { dbConnectionNeo4j } = require('../database/Neo4jConnection')
 
 class Server {
   constructor () {
@@ -37,7 +38,7 @@ class Server {
 
     // Conexion a mongo
     this.conectarMongo()
-
+    this.conectarNeo4j()
     // Middlewares
     this.middlewares()
 
@@ -73,7 +74,19 @@ class Server {
     await dbConnectionMongo()
   }
 
+    async conectarNeo4j () {
+    try {
+      this.neo4jDriver = await dbConnectionNeo4j()
+    } catch (error) {
+      console.error('No se pudo conectar a Neo4j', error)
+    }
+  }
   routes () {
+    this.app.use((req, res, next) => {
+      // Disponibilizar el driver en todas las rutas
+      req.neo4jDriver = this.neo4jDriver;
+      next();
+    })
     // this.app.use(this.pathsMySql.auth, require('../routes/MySqlAuth'));
     // this.app.use(this.pathsMySql.heroes, require('../routes/mySqlHeroes.routes'))
     // this.app.use(this.pathsMySql.peliculas, require('../routes/mySqlPeliculas.routes'))
